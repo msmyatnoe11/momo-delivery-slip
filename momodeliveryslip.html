@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOMO Delivery Slip</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700;800&family=DM+Sans:wght@400;600;700;800&family=DM+Mono:wght@500;600&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --peach: #E8673A;
+  --peach-light: #FDF0EB;
+  --peach-mid: #F0C4B0;
+  --peach-dark: #B54A22;
+  --cream: #FDFAF8;
+  --ink: #0F0A07;
+  --ink-2: #2E1A0E;
+  --ink-3: #7A5540;
+  --ink-4: #C4A090;
+  --white: #FFFFFF;
+  --green: #1A6B3A;
+  --slip-w: 300px;
+  --r: 10px;
+}
+
+body {
+  font-family: 'DM Sans', 'Noto Sans Myanmar', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2.5rem 1.5rem;
+}
+
+.header { text-align: center; margin-bottom: 3rem; }
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 1.5px solid var(--peach-mid);
+  border-radius: 100px;
+  padding: 8px 22px 8px 14px;
+  margin-bottom: 1rem;
+}
+.header-badge .peach-icon { font-size: 1.7rem; }
+.header-badge .brand-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: 1px;
+}
+.header-badge .brand-text span { color: var(--peach); }
+.header-sub {
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+
+.layout {
+  display: flex;
+  gap: 2.5rem;
+  max-width: 860px;
+  margin: 0 auto;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.form-panel {
+  flex: 1; min-width: 300px;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1.5px solid #EAE0DA;
+  padding: 1.75rem;
+}
+
+.section-label {
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: #EAE0DA; }
+
+.field { margin-bottom: 0.9rem; }
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-bottom: 5px;
+  letter-spacing: 0.2px;
+}
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 9px 13px;
+  border: 1.5px solid #EAE0DA;
+  border-radius: 8px;
+  font-family: 'DM Sans', 'Noto Sans Myanmar', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--cream);
+  transition: all 0.18s ease;
+  outline: none;
+  appearance: none;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--peach);
+  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(232,103,58,0.10);
+}
+.field textarea { resize: vertical; min-height: 68px; line-height: 1.55; }
+#codBox { display: none; margin-top: 8px; }
+#codAmount { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 600; }
+.sep { height: 1px; background: #EAE0DA; margin: 1.2rem 0; }
+
+.btn-gen {
+  width: 100%; padding: 12px 0;
+  background: var(--peach); color: #fff; border: none;
+  border-radius: 9px; font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; font-weight: 800; letter-spacing: 0.5px;
+  cursor: pointer; transition: background 0.2s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-gen:hover { background: var(--peach-dark); }
+.btn-gen:active { transform: scale(0.98); }
+
+.preview-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.preview-tag {
+  align-self: flex-start;
+  font-size: 0.63rem; font-weight: 800;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.slip-shadow {
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 8px 24px rgba(180,74,34,0.14), 0 24px 48px rgba(180,74,34,0.07);
+}
+
+/* ── SLIP ── */
+#slip {
+  width: var(--slip-w);
+  background: var(--white);
+  font-family: 'DM Sans', 'Noto Sans Myanmar', sans-serif;
+  color: var(--ink);
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.s-head {
+  padding: 16px 16px 12px;
+  text-align: center;
+  background: var(--white);
+}
+.s-peach-emoji { font-size: 36px; line-height: 1; display: block; margin-bottom: 4px; }
+.s-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 900;
+  color: var(--ink); letter-spacing: 2px; line-height: 1;
+}
+.s-brand span { color: var(--peach); }
+.s-tagline {
+  font-size: 8px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--ink-3);
+  margin-top: 4px; font-weight: 700;
+}
+
+.s-rule { display: flex; align-items: center; gap: 6px; padding: 0 16px; margin: 0 0 2px; }
+.s-rule-line { flex: 1; height: 1px; background: var(--peach-mid); }
+.s-rule-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--peach); flex-shrink: 0; }
+
+.s-body { padding: 10px 16px; }
+
+.s-row { display: flex; align-items: flex-start; margin-bottom: 7px; }
+.s-key {
+  font-size: 9.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--ink-3); min-width: 62px; flex-shrink: 0;
+  padding-top: 2px; font-family: 'DM Mono', monospace;
+}
+.s-colon { color: var(--ink-4); margin: 0 6px 0 0; padding-top: 2px; font-size: 11px; font-weight: 700; }
+.s-val {
+  font-size: 13px; font-weight: 700;
+  color: var(--ink); flex: 1;
+  line-height: 1.45; word-break: break-word;
+  font-family: 'Noto Sans Myanmar', 'DM Sans', sans-serif;
+}
+
+.s-dash { border: none; border-top: 1px dashed var(--peach-mid); margin: 9px 0; }
+
+.s-item {
+  background: var(--peach-light);
+  border-radius: 6px; padding: 9px 10px; margin: 6px 0;
+}
+.s-item-label {
+  font-size: 8.5px; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--peach-dark); margin-bottom: 3px;
+  font-family: 'DM Mono', monospace;
+}
+.s-item-name {
+  font-size: 14.5px; font-weight: 800;
+  color: var(--ink); line-height: 1.3;
+  font-family: 'Noto Sans Myanmar', 'DM Sans', sans-serif;
+}
+
+.s-badge-wrap { text-align: center; margin: 8px 0 2px; }
+
+.b-paid {
+  display: inline-block;
+  border: 3px solid var(--green);
+  color: var(--green);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 30px; font-weight: 800;
+  letter-spacing: 8px; padding: 3px 14px;
+  border-radius: 4px; transform: rotate(-3deg); opacity: 0.85;
+}
+
+.b-cod {
+  background: var(--ink); color: #fff;
+  border-radius: 6px; padding: 10px 14px;
+  width: 100%; display: block;
+}
+.b-cod-top {
+  font-size: 8.5px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: rgba(255,255,255,0.5);
+  font-family: 'DM Mono', monospace; margin-bottom: 2px; font-weight: 600;
+}
+.b-cod-amt {
+  font-size: 28px; font-weight: 800;
+  color: var(--peach); font-family: 'DM Mono', monospace;
+  letter-spacing: 1px; line-height: 1.15;
+}
+.b-cod-sub {
+  font-size: 9px; color: rgba(255,255,255,0.4);
+  margin-top: 1px; letter-spacing: 1px; font-weight: 600;
+  font-family: 'Noto Sans Myanmar', sans-serif;
+}
+
+.s-note {
+  background: #FFF8F5;
+  border-left: 2.5px solid var(--peach);
+  border-radius: 0 5px 5px 0;
+  padding: 6px 9px; margin: 7px 0 3px;
+}
+.s-note-label {
+  font-size: 8.5px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--peach-dark); margin-bottom: 2px;
+  font-family: 'DM Mono', monospace;
+}
+.s-note-text {
+  font-size: 12px; font-weight: 600;
+  color: var(--ink-2); line-height: 1.4;
+  font-family: 'Noto Sans Myanmar', 'DM Sans', sans-serif;
+}
+
+.s-footer { padding: 8px 16px 14px; text-align: center; }
+.s-footer-rule { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.s-footer-rule .line { flex: 1; height: 1px; background: var(--peach-mid); }
+.s-footer-rule .dots { display: flex; gap: 3px; }
+.s-footer-rule .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--peach-mid); }
+.s-footer-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px; font-weight: 800;
+  color: var(--ink-3); letter-spacing: 2px;
+}
+.s-footer-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  color: var(--ink-4); margin-top: 3px; letter-spacing: 0.5px;
+}
+
+.btn-print {
+  width: var(--slip-w); padding: 11px;
+  background: var(--ink); color: #fff; border: none;
+  border-radius: 9px; font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+}
+.btn-print:hover { background: var(--ink-2); }
+
+.empty {
+  width: var(--slip-w); height: 340px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1.5px dashed var(--peach-mid);
+  border-radius: 12px; gap: 10px;
+  background: var(--white);
+}
+.empty-icon { font-size: 2.8rem; opacity: 0.35; }
+.empty p { font-size: 0.82rem; font-weight: 600; color: var(--ink-3); text-align: center; line-height: 1.6; }
+.empty strong { color: var(--peach-dark); }
+
+@media print {
+  body * { visibility: hidden; }
+  #slip, #slip * { visibility: visible; }
+  #slip { position: fixed !important; left: 0 !important; top: 0 !important; width: 80mm !important; }
+  .b-cod, .s-item { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">
+    <span class="peach-icon">🍑</span>
+    <span class="brand-text">MO<span>M</span>O</span>
+  </div>
+  <div class="header-sub">Delivery Slip Generator</div>
+</div>
+
+<div class="layout">
+  <div class="form-panel">
+    <div class="section-label">Customer Info</div>
+    <div class="field">
+      <label>နာမည်</label>
+      <input id="fName" type="text" placeholder="မောင်မောင်" />
+    </div>
+    <div class="field">
+      <label>Phone · ဖုန်းနံပါတ်</label>
+      <input id="fPhone" type="tel" placeholder="09xxxxxxxxx" />
+    </div>
+    <div class="field">
+      <label>Address · လိပ်စာ</label>
+      <textarea id="fAddr" placeholder="အမှတ်/လမ်း/မြို့နယ်/တိုင်းဒေသ..."></textarea>
+    </div>
+    <div class="sep"></div>
+    <div class="section-label">Item Info</div>
+    <div class="field">
+      <label>Item Name · ပစ္စည်းအမည်</label>
+      <input id="fItem" type="text" placeholder="ZARA Eau de Parfum 100ml" />
+    </div>
+    <div class="field">
+      <label>Note · မှတ်ချက်</label>
+      <textarea id="fNote" placeholder="အရောင်၊ Size၊ ထူးခြားချက်..."></textarea>
+    </div>
+    <div class="sep"></div>
+    <div class="section-label">Payment</div>
+    <div class="field">
+      <label>Payment Type</label>
+      <select id="fPay" onchange="toggleCod()">
+        <option value="prepaid">✓  Prepaid — ကြိုပေးချေ</option>
+        <option value="cod">💵  Cash on Delivery (COD)</option>
+      </select>
+      <div id="codBox">
+        <input id="codAmount" type="number" placeholder="Amount (Ks)" min="0" />
+      </div>
+    </div>
+    <button class="btn-gen" onclick="generate()"><span>🍑</span> Generate Slip</button>
+  </div>
+
+  <div class="preview-col">
+    <div class="preview-tag">Preview</div>
+    <div id="emptyState" class="empty">
+      <div class="empty-icon">🍑</div>
+      <p>Form ဖြည့်ပြီး<br><strong>Generate</strong> နှိပ်ပါ</p>
+    </div>
+    <div id="slipWrap" class="slip-shadow" style="display:none;">
+      <div id="slip"></div>
+    </div>
+    <button class="btn-print" id="btnPrint" style="display:none;" onclick="window.print()">🖨 Print Slip</button>
+  </div>
+</div>
+
+<script>
+function toggleCod() {
+  document.getElementById('codBox').style.display =
+    document.getElementById('fPay').value === 'cod' ? 'block' : 'none';
+}
+function ts() {
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}  ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function generate() {
+  const name  = esc(document.getElementById('fName').value.trim()) || '—';
+  const phone = esc(document.getElementById('fPhone').value.trim()) || '—';
+  const addr  = esc(document.getElementById('fAddr').value.trim()).replace(/\n/g,'<br>') || '—';
+  const item  = esc(document.getElementById('fItem').value.trim()) || '—';
+  const note  = esc(document.getElementById('fNote').value.trim()).replace(/\n/g,'<br>');
+  const pay   = document.getElementById('fPay').value;
+  const amt   = document.getElementById('codAmount').value.trim();
+
+  let badge = '';
+  if (pay === 'prepaid') {
+    badge = `<div class="s-badge-wrap"><span class="b-paid">PAID</span></div>`;
+  } else {
+    const famt = amt ? Number(amt).toLocaleString() + ' Ks' : '— Ks';
+    badge = `<div class="s-badge-wrap"><div class="b-cod"><div class="b-cod-top">Cash on Delivery</div><div class="b-cod-amt">${famt}</div><div class="b-cod-sub">ငွေသားပေးချေမည်</div></div></div>`;
+  }
+
+  const noteHtml = note
+    ? `<div class="s-note"><div class="s-note-label">Note</div><div class="s-note-text">${note}</div></div>`
+    : '';
+
+  document.getElementById('slip').innerHTML = `
+    <div class="s-head">
+      <span class="s-peach-emoji">🍑</span>
+      <div class="s-brand">MO<span>M</span>O</div>
+      <div class="s-tagline">もも · Online Shop · Delivery Slip</div>
+    </div>
+    <div class="s-rule"><div class="s-rule-line"></div><div class="s-rule-dot"></div><div class="s-rule-line"></div></div>
+    <div class="s-body">
+      <div class="s-row"><span class="s-key">Name</span><span class="s-colon">:</span><span class="s-val">${name}</span></div>
+      <div class="s-row"><span class="s-key">Phone</span><span class="s-colon">:</span><span class="s-val">${phone}</span></div>
+      <div class="s-row"><span class="s-key">Address</span><span class="s-colon">:</span><span class="s-val">${addr}</span></div>
+      <hr class="s-dash">
+      <div class="s-item"><div class="s-item-label">Item</div><div class="s-item-name">${item}</div></div>
+      ${noteHtml}
+      <hr class="s-dash">
+      ${badge}
+    </div>
+    <div class="s-footer">
+      <div class="s-footer-rule"><div class="line"></div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="line"></div></div>
+      <div class="s-footer-brand">MOMO · မိမိ</div>
+      <div class="s-footer-date">${ts()}</div>
+    </div>`;
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('slipWrap').style.display = 'block';
+  document.getElementById('btnPrint').style.display = 'block';
+}
+</script>
+</body>
+</html>
