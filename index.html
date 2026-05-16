@@ -571,7 +571,7 @@ function generate() {
     badge = `<div class="s-badge-wrap"><span class="b-paid">PAID</span></div>`;
   } else {
     const famt = amt ? Number(amt).toLocaleString() + ' Ks' : '— Ks';
-    badge = `<div class="s-badge-wrap"><div class="b-cod"><div class="b-cod-top">Cash on Delivery</div><div class="b-cod-amt">${famt}</div><div class="b-cod-sub">Cash Payment</div></div></div>`;
+    badge = `<div class="s-badge-wrap"><div class="b-cod"><div class="b-cod-top">Cash on Delivery</div><div class="b-cod-amt">${famt}</div><div class="b-cod-sub">PAY ON ARRIVAL</div></div></div>`;
   }
 
   const noteHtml = note
