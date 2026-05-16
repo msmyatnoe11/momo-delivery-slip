@@ -303,7 +303,7 @@ body {
 }
 .btn-save:hover { background: var(--peach-mid); }
 
-
+.empty {
   width: var(--slip-w); height: 340px;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -314,6 +314,40 @@ body {
 .empty-icon { font-size: 2.8rem; opacity: 0.35; }
 .empty p { font-size: 0.82rem; font-weight: 600; color: var(--ink-3); text-align: center; line-height: 1.6; }
 .empty strong { color: var(--peach-dark); }
+
+/* Smart Paste */
+.smart-paste-box {
+  background: var(--peach-light);
+  border: 1.5px dashed var(--peach);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 1.2rem;
+}
+.smart-paste-box .sp-label {
+  font-size: 0.65rem; font-weight: 800;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--peach-dark); margin-bottom: 6px;
+}
+.smart-paste-box textarea {
+  width: 100%; min-height: 80px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--peach-mid);
+  border-radius: 8px;
+  font-family: 'DM Sans', 'Noto Sans Myanmar', sans-serif;
+  font-size: 0.88rem; font-weight: 600;
+  color: var(--ink); background: var(--white);
+  resize: vertical; outline: none;
+  transition: border-color 0.18s;
+}
+.smart-paste-box textarea:focus { border-color: var(--peach); }
+.sp-hint { font-size: 0.72rem; color: var(--ink-3); margin-top: 6px; line-height: 1.5; }
+.sp-result {
+  display: none; margin-top: 8px;
+  background: var(--white); border: 1px solid var(--peach-mid);
+  border-radius: 7px; padding: 8px 10px;
+  font-size: 0.78rem; color: var(--ink-2); line-height: 1.8;
+}
+.sp-result b { color: var(--peach-dark); }
 
 @media print {
   body * { visibility: hidden; }
@@ -335,6 +369,15 @@ body {
 
 <div class="layout">
   <div class="form-panel">
+
+    <!-- SMART PASTE -->
+    <div class="smart-paste-box">
+      <div class="sp-label">⚡ Smart Paste</div>
+      <textarea id="spInput" placeholder="Customer အချက်အလက်တွေကို ဒီမှာ paste လုပ်ပါ..." spellcheck="false"></textarea>
+      <div class="sp-hint">နာမည်၊ ဖုန်း၊ လိပ်စာ စာသားတွေကို paste လုပ်လိုက်ရင် အလိုအလျောက် ခွဲထည့်ပေးမယ်</div>
+      <div class="sp-result" id="spResult"></div>
+    </div>
+
     <div class="section-label">Customer Info</div>
     <div class="field">
       <label>နာမည်</label>
@@ -391,6 +434,109 @@ body {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
+// ── SMART PASTE ──
+document.getElementById('spInput').addEventListener('input', function() {
+  const raw = this.value.trim();
+  if (!raw) { document.getElementById('spResult').style.display = 'none'; return; }
+  smartParse(raw);
+});
+
+function smartParse(raw) {
+  // ── 0. Convert Myanmar digits to ASCII ──
+  const mmToEn = s => s.replace(/[၀-၉]/g, d => d.charCodeAt(0) - 0x1040);
+
+  // ── 1. Pre-split: insert newline before 〒 and after phone numbers ──
+  let prep = raw;
+  prep = prep.replace(/([0-9]{10,11})\s*[|｜]\s*(〒)/g, '$1\n$2'); // "07090982887|〒" → split
+  prep = prep.replace(/(〒)/g, '\n〒');                              // always newline before 〒
+  prep = prep.replace(/([0-9]{10,11})/g, '\n$1\n');                 // isolate phone numbers
+
+  // ── 2. Normalize other separators ──
+  prep = prep.replace(/[|｜—]{1,}/g, '\n');
+  prep = prep.replace(/\s*\/\s*/g, '\n');
+  prep = prep.replace(/--+/g, '\n');
+  prep = prep.replace(/\n{2,}/g, '\n');
+
+  // ── 3. Extract phone: 09x (Myanmar) or 070/080/090 (Japan), 10-11 digits ──
+  const phoneReg  = /\b(09[\d]{6,9})\b/;           // Myanmar
+  const jpPhoneReg = /\b(0[789]0[\d]{8})\b/;        // Japan mobile
+  const converted = mmToEn(prep);
+
+  let phone = '';
+  const pmMM = converted.match(phoneReg);
+  const pmJP = converted.match(jpPhoneReg);
+  if (pmMM) phone = pmMM[1];
+  else if (pmJP) phone = pmJP[1];
+
+  // Remove phone from text
+  let text = prep.replace(/[0-9၀-၉]{10,11}/g, '').trim();
+
+  // ── 4. Split into tokens ──
+  const tokens = text.split(/[\n,،]+/).map(s => s.replace(/^\s*[-:။·•]\s*/,'').trim()).filter(Boolean);
+
+  // ── 5. Classifiers ──
+  const addrReg = /အမှတ်|အမှတ္|လမ်း|လမ်းမ|ရပ်ကွက်|မြို့နယ်|မြို့|တိုင်းဒေသ|တိုင်း|ဒေသကြီး|ကျေးရွာ|ဘုရား|စျေး|ဂိတ်|အနောက်|အရှေ့|တောင်|မြောက်|ထပ်|တိုက်|ခန်း|ward|st\.|rd\.|ave|blk|block|\bno[\s.]\b/i;
+  const hasJP        = s => /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/.test(s);
+  const hasPostalCode = s => /〒\s*\d{3}-?\d{4}/.test(s) || /^\d{3}-\d{4}$/.test(s.trim());
+  const hasJPAddrWord = s => /県|都|道|府|市|区|町|村|郡|丁目|番地|号|棟|室|階|番|コー/.test(s);
+  const isKatakana    = s => /^[\u30A0-\u30FF\u30FC\uFF65-\uFF9F\s・]+$/.test(s);
+  const isHiragana    = s => /^[\u3040-\u309F\s]+$/.test(s);
+  const isJPName      = s => {
+    if (hasJPAddrWord(s) || hasPostalCode(s)) return false;
+    if (isKatakana(s) && s.length <= 20) return true;
+    if (isHiragana(s) && s.length <= 20) return true;
+    if (/^[\u4E00-\u9FFF]+$/.test(s) && s.length <= 8) return true;
+    return false;
+  };
+  const hasMM    = s => /[\u1000-\u109F]/.test(s);
+  const hasDigit = s => /[\d၀-၉]/.test(s);
+
+  let name = '';
+  const addrParts = [];
+
+  for (const tok of tokens) {
+    if (!tok) continue;
+    if (/^[\d]{7,11}$/.test(mmToEn(tok))) continue; // skip leftover phone digits
+
+    if (hasPostalCode(tok))             { addrParts.push(tok); continue; }
+    if (isJPName(tok))                  { if (!name) { name = tok; continue; } }
+    if (hasJPAddrWord(tok))             { addrParts.push(tok); continue; }
+    if (hasJP(tok) && hasDigit(tok))    { addrParts.push(tok); continue; }
+    if (/^[\d၀-၉]{1,6}$/.test(tok))    { addrParts.push(tok); continue; }
+    if (addrReg.test(tok))              { addrParts.push(tok); continue; }
+    if (hasDigit(tok) && hasMM(tok))    { addrParts.push(tok); continue; }
+    if (hasMM(tok) && tok.length <= 25) { if (!name) { name = tok; continue; } }
+    if (!hasMM(tok) && !hasJP(tok) && !hasDigit(tok) && tok.length <= 30) {
+      if (!name) { name = tok; continue; }
+    }
+    addrParts.push(tok);
+  }
+
+  // Fallback: last addrPart as name if no name found
+  let finalName = name;
+  let finalAddr = addrParts.join('၊ ');
+  if (!finalName && addrParts.length > 1) {
+    const last = addrParts[addrParts.length - 1];
+    if (hasMM(last) && !addrReg.test(last) && !hasPostalCode(last) && !hasJPAddrWord(last) && !hasDigit(last) && last.length <= 20) {
+      finalName = last;
+      finalAddr = addrParts.slice(0, -1).join('၊ ');
+    }
+  }
+
+  // ── 6. Fill fields ──
+  if (finalName)  document.getElementById('fName').value  = finalName;
+  if (phone)      document.getElementById('fPhone').value = phone;
+  if (finalAddr)  document.getElementById('fAddr').value  = finalAddr;
+
+  // ── 7. Show result ──
+  const res = document.getElementById('spResult');
+  res.style.display = 'block';
+  res.innerHTML =
+    `<b>နာမည်</b> ${finalName || '<span style="color:#bbb">—</span>'}<br>` +
+    `<b>ဖုန်း &nbsp;&nbsp;</b> ${phone     || '<span style="color:#bbb">—</span>'}<br>` +
+    `<b>လိပ်စာ</b> ${finalAddr || '<span style="color:#bbb">—</span>'}`;
+}
+
 function toggleCod() {
   document.getElementById('codBox').style.display =
     document.getElementById('fPay').value === 'cod' ? 'block' : 'none';
