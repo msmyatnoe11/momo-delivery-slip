@@ -294,7 +294,16 @@ body {
 }
 .btn-print:hover { background: var(--ink-2); }
 
-.empty {
+.btn-save {
+  width: 100%; padding: 11px;
+  background: var(--peach-light); color: var(--peach-dark); border: 1.5px solid var(--peach-mid);
+  border-radius: 9px; font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+}
+.btn-save:hover { background: var(--peach-mid); }
+
+
   width: var(--slip-w); height: 340px;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -329,25 +338,25 @@ body {
     <div class="section-label">Customer Info</div>
     <div class="field">
       <label>နာမည်</label>
-      <input id="fName" type="text" placeholder="မောင်မောင်" />
+      <input id="fName" type="text" placeholder="မောင်မောင်" spellcheck="false" autocomplete="off" />
     </div>
     <div class="field">
       <label>Phone · ဖုန်းနံပါတ်</label>
-      <input id="fPhone" type="tel" placeholder="09xxxxxxxxx" />
+      <input id="fPhone" type="tel" placeholder="09xxxxxxxxx" spellcheck="false" autocomplete="off" />
     </div>
     <div class="field">
       <label>Address · လိပ်စာ</label>
-      <textarea id="fAddr" placeholder="အမှတ်/လမ်း/မြို့နယ်/တိုင်းဒေသ..."></textarea>
+      <textarea id="fAddr" placeholder="အမှတ်/လမ်း/မြို့နယ်/တိုင်းဒေသ..." spellcheck="false"></textarea>
     </div>
     <div class="sep"></div>
     <div class="section-label">Item Info</div>
     <div class="field">
       <label>Item Name · ပစ္စည်းအမည်</label>
-      <input id="fItem" type="text" placeholder="ZARA Eau de Parfum 100ml" />
+      <input id="fItem" type="text" placeholder="ZARA Eau de Parfum 100ml" spellcheck="false" autocomplete="off" />
     </div>
     <div class="field">
       <label>Note · မှတ်ချက်</label>
-      <textarea id="fNote" placeholder="အရောင်၊ Size၊ ထူးခြားချက်..."></textarea>
+      <textarea id="fNote" placeholder="အရောင်၊ Size၊ ထူးခြားချက်..." spellcheck="false"></textarea>
     </div>
     <div class="sep"></div>
     <div class="section-label">Payment</div>
@@ -373,10 +382,14 @@ body {
     <div id="slipWrap" class="slip-shadow" style="display:none;">
       <div id="slip"></div>
     </div>
-    <button class="btn-print" id="btnPrint" style="display:none;" onclick="window.print()">🖨 Print Slip</button>
+    <div id="btnGroup" style="display:none; flex-direction:column; gap:8px; width:var(--slip-w);">
+      <button class="btn-print" onclick="window.print()">🖨 Print Slip</button>
+      <button class="btn-save" onclick="saveImage()">🖼 Save as Image</button>
+    </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 function toggleCod() {
   document.getElementById('codBox').style.display =
@@ -435,7 +448,24 @@ function generate() {
 
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('slipWrap').style.display = 'block';
-  document.getElementById('btnPrint').style.display = 'block';
+  const bg = document.getElementById('btnGroup');
+  bg.style.display = 'flex';
+}
+
+function saveImage() {
+  const slip = document.getElementById('slip');
+  const btn = document.querySelector('.btn-save');
+  btn.textContent = '⏳ Saving...';
+  btn.disabled = true;
+  html2canvas(slip, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas => {
+    const link = document.createElement('a');
+    const name = document.getElementById('fName').value.trim() || 'slip';
+    link.download = 'MOMO-slip-' + name + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = '🖼 Save as Image';
+    btn.disabled = false;
+  });
 }
 </script>
 </body>
