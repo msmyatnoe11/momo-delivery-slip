@@ -571,7 +571,7 @@ function generate() {
     badge = `<div class="s-badge-wrap"><span class="b-paid">PAID</span></div>`;
   } else {
     const famt = amt ? Number(amt).toLocaleString() + ' Ks' : '— Ks';
-    badge = `<div class="s-badge-wrap"><div class="b-cod"><div class="b-cod-top">Cash on Delivery</div><div class="b-cod-amt">${famt}</div><div class="b-cod-sub">ငွေသားပေးချေမည်</div></div></div>`;
+    badge = `<div class="s-badge-wrap"><div class="b-cod"><div class="b-cod-top">Cash on Delivery</div><div class="b-cod-amt">${famt}</div><div class="b-cod-sub">Cash Payment</div></div></div>`;
   }
 
   const noteHtml = note
@@ -613,43 +613,38 @@ function saveImage() {
   btn.textContent = '⏳ Loading...';
   btn.disabled = true;
 
-  // Force all fonts to load before capturing
-  document.fonts.ready.then(() => {
-    html2canvas(slip, {
-      scale: 3,
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      logging: false,
-      onclone: (doc) => {
-        // Inject font-face into cloned document to ensure Myanmar font renders
-        const style = doc.createElement('style');
-        style.textContent = `
-          @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700;800&family=DM+Sans:wght@400;600;700;800&family=DM+Mono:wght@500;600&family=Playfair+Display:wght@800;900&family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
-          * { -webkit-font-smoothing: antialiased; }
-        `;
-        doc.head.appendChild(style);
-      }
-    }).then(async canvas => {
-      try {
-        canvas.toBlob(async (blob) => {
-          const name = (document.getElementById('fName').value.trim() || 'slip');
-          const file = new File([blob], 'MOMO-slip-' + name + '.png', { type: 'image/png' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: 'MOMO Slip' });
-          } else {
-            const link = document.createElement('a');
-            link.download = 'MOMO-slip-' + name + '.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          }
-          btn.textContent = '🖼 Save as Image';
-          btn.disabled = false;
-        }, 'image/png');
-      } catch (e) {
+  html2canvas(slip, {
+    scale: 3,
+    backgroundColor: '#ffffff',
+    useCORS: true,
+    allowTaint: true,
+    logging: false
+  }).then(async canvas => {
+    try {
+      canvas.toBlob(async (blob) => {
+        const name = (document.getElementById('fName').value.trim() || 'slip');
+        const file = new File([blob], 'MOMO-slip-' + name + '.png', { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'MOMO Slip' });
+        } else {
+          const link = document.createElement('a');
+          link.download = 'MOMO-slip-' + name + '.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        }
         btn.textContent = '🖼 Save as Image';
         btn.disabled = false;
-      }
-    });
+      }, 'image/png');
+    } catch (e) {
+      console.error(e);
+      btn.textContent = '🖼 Save as Image';
+      btn.disabled = false;
+    }
+  }).catch(err => {
+    console.error(err);
+    btn.textContent = '🖼 Save as Image';
+    btn.disabled = false;
+    alert('Error: ' + err.message);
   });
 }
 </script>
