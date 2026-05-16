@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MOMO Delivery Slip</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700;800&family=DM+Sans:wght@400;600;700;800&family=DM+Mono:wght@500;600&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700;800&family=DM+Sans:wght@400;600;700;800&family=DM+Mono:wght@500;600&family=Playfair+Display:wght@800;900&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -178,6 +178,10 @@ body {
   text-transform: uppercase; color: var(--ink-3);
   margin-top: 4px; font-weight: 700;
 }
+.s-tagline .jp {
+  font-family: 'M PLUS Rounded 1c', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  text-transform: none; letter-spacing: 3px; font-size: 10px;
+}
 
 .s-rule { display: flex; align-items: center; gap: 6px; padding: 0 16px; margin: 0 0 2px; }
 .s-rule-line { flex: 1; height: 1px; background: var(--peach-mid); }
@@ -278,6 +282,10 @@ body {
   font-family: 'Playfair Display', serif;
   font-size: 11px; font-weight: 800;
   color: var(--ink-3); letter-spacing: 2px;
+}
+.s-footer-brand .mm {
+  font-family: 'Noto Sans Myanmar', sans-serif;
+  font-weight: 700; letter-spacing: 0;
 }
 .s-footer-date {
   font-family: 'DM Mono', monospace;
@@ -573,7 +581,7 @@ function generate() {
     <div class="s-head">
       <span class="s-peach-emoji">🍑</span>
       <div class="s-brand">MO<span>M</span>O</div>
-      <div class="s-tagline">もも · Online Shop · Delivery Slip</div>
+      <div class="s-tagline"><span class="jp">もも</span> · Online Shop · Delivery Slip</div>
     </div>
     <div class="s-rule"><div class="s-rule-line"></div><div class="s-rule-dot"></div><div class="s-rule-line"></div></div>
     <div class="s-body">
@@ -588,7 +596,7 @@ function generate() {
     </div>
     <div class="s-footer">
       <div class="s-footer-rule"><div class="line"></div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="line"></div></div>
-      <div class="s-footer-brand">MOMO · မိမိ</div>
+      <div class="s-footer-brand">MOMO</div>
       <div class="s-footer-date">${ts()}</div>
     </div>`;
 
